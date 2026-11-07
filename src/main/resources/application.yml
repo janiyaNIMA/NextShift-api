@@ -1,0 +1,35 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: ${PROJECT_NAME:unishift-backend}
+  datasource:
+    url: ${DATABASE_URL:${DB_URL:jdbc:postgresql://localhost:5432/unishift_db}}
+    username: ${DATABASE_USERNAME:${DB_USERNAME:postgres}}
+    password: ${DATABASE_PASSWORD:${DB_PASSWORD:}}
+    driver-class-name: ${DATABASE_DRIVER_CLASS_NAME:${DB_DRIVER_CLASS_NAME:org.postgresql.Driver}}
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:create-drop}
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+        format_sql: true
+  flyway:
+    enabled: ${FLYWAY_ENABLED:false}
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+security:
+  jwt:
+    secret: ${JWT_SECRET_KEY:${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}}
+    expiration-ms: ${ACCESS_TOKEN_EXPIRE_MINUTES:${JWT_EXPIRATION_MS:86400000}}
+
+app:
+  admin:
+    name: ${FIRST_ADMIN_NAME:${ADMIN_NAME:Platform Administrator}}
+    email: ${FIRST_ADMIN_EMAIL:${ADMIN_EMAIL:}}
+    password: ${FIRST_ADMIN_PASSWORD:${ADMIN_PASSWORD:}}

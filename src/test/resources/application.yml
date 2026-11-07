@@ -1,0 +1,29 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: unishift-backend-test
+  datasource:
+    url: jdbc:h2:mem:unishift_test;DB_CLOSE_DELAY=-1;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    show-sql: false
+  flyway:
+    enabled: false
+
+security:
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration-ms: 86400000
+
+app:
+  admin:
+    name: Test Admin
+    email: admin@test.com
+    password: AdminTestPassword123!
