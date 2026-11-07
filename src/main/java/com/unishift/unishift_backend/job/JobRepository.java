@@ -36,8 +36,8 @@ public interface JobRepository extends JpaRepository<Job, Long> {
               AND e.active = true
               AND e.approved = true
               AND j.startsAt > :now
-              AND (:category IS NULL OR LOWER(j.category) = LOWER(:category))
-              AND (:location IS NULL OR LOWER(j.location) = LOWER(:location))
+              AND (CAST(:category AS string) IS NULL OR LOWER(j.category) = LOWER(CAST(:category AS string)))
+              AND (CAST(:location AS string) IS NULL OR LOWER(j.location) = LOWER(CAST(:location AS string)))
               AND j.capacity > (
                   SELECT COUNT(b) FROM Booking b
                   WHERE b.job = j AND b.status = :confirmedStatus
@@ -51,8 +51,8 @@ public interface JobRepository extends JpaRepository<Job, Long> {
               AND e.active = true
               AND e.approved = true
               AND j.startsAt > :now
-              AND (:category IS NULL OR LOWER(j.category) = LOWER(:category))
-              AND (:location IS NULL OR LOWER(j.location) = LOWER(:location))
+              AND (CAST(:category AS string) IS NULL OR LOWER(j.category) = LOWER(CAST(:category AS string)))
+              AND (CAST(:location AS string) IS NULL OR LOWER(j.location) = LOWER(CAST(:location AS string)))
               AND j.capacity > (
                   SELECT COUNT(b) FROM Booking b
                   WHERE b.job = j AND b.status = :confirmedStatus
