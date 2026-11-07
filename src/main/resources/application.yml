@@ -11,7 +11,7 @@ spring:
     driver-class-name: ${DATABASE_DRIVER_CLASS_NAME:${DB_DRIVER_CLASS_NAME:org.postgresql.Driver}}
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:create-drop}
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
     open-in-view: false
     show-sql: false
     properties:
