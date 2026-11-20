@@ -1,0 +1,81 @@
+<mxfile host="app.diagrams.net" modified="2026-11-20T14:35:00.000Z" agent="Mozilla/5.0" version="24.0.0">
+  <diagram name="5. Security &amp; DTO Records" id="single-page">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1750" pageHeight="1150" math="0" shadow="0">
+<root>
+  <mxCell id="0" />
+  <mxCell id="1" parent="0" />
+
+  <!-- Title Banner -->
+  <mxCell id="title5" value="&lt;b&gt;&lt;font style=&quot;font-size: 20px; color: #134e4a;&quot;&gt;UniShift — Security Architecture &amp;amp; DTO Records&lt;/font&gt;&lt;/b&gt;&lt;br/&gt;&lt;font style=&quot;font-size: 13px; color: #0f766e;&quot;&gt;Spring Security Contracts, JWT Filter Chain &amp;amp; Immutable Java 21 Record DTOs&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccfbf1;strokeColor=#14b8a6;strokeWidth=2;align=center;verticalAlign=middle;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="325" y="30" width="1000" height="65" as="geometry" />
+  </mxCell>
+
+  <!-- Spring Security UserDetails Interface -->
+  <mxCell id="userDetails" value="&lt;b&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;br/&gt;org.springframework...UserDetails&lt;/b&gt;&lt;hr/&gt;+ getAuthorities() : Collection&lt;br/&gt;+ getPassword() : String&lt;br/&gt;+ getUsername() : String&lt;br/&gt;+ isEnabled() : boolean" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdfa;strokeColor=#0d9488;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontColor=#134e4a;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="120" y="150" width="280" height="130" as="geometry" />
+  </mxCell>
+
+  <!-- UserPrincipal -->
+  <mxCell id="userPrincipal" value="&lt;b&gt;UserPrincipal&lt;/b&gt;&lt;hr/&gt;- Long id&lt;br/&gt;- String name&lt;br/&gt;- String email&lt;br/&gt;- String password&lt;br/&gt;- UserRole role&lt;br/&gt;- boolean active, approved&lt;hr/&gt;+ create(User user) : UserPrincipal&lt;br/&gt;&lt;b&gt;@Override&lt;/b&gt;&lt;br/&gt;+ getAuthorities() : Collection&lt;br/&gt;+ getPassword() / getUsername()&lt;br/&gt;+ isEnabled() : boolean" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdfa;strokeColor=#0d9488;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontColor=#134e4a;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="120" y="340" width="280" height="200" as="geometry" />
+  </mxCell>
+
+  <!-- UserDetailsService Interface -->
+  <mxCell id="userDetailsService" value="&lt;b&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;br/&gt;UserDetailsService&lt;/b&gt;&lt;hr/&gt;+ loadUserByUsername(email) : UserDetails" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdfa;strokeColor=#0d9488;strokeWidth=1.5;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontColor=#134e4a;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="460" y="150" width="280" height="90" as="geometry" />
+  </mxCell>
+
+  <!-- CustomUserDetailsService -->
+  <mxCell id="customUserService" value="&lt;b&gt;CustomUserDetailsService&lt;/b&gt;&lt;hr/&gt;- UserRepository userRepository&lt;hr/&gt;&lt;b&gt;@Override&lt;/b&gt;&lt;br/&gt;+ loadUserByUsername(email) : UserDetails" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdfa;strokeColor=#0d9488;strokeWidth=1.5;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontColor=#134e4a;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="460" y="340" width="280" height="110" as="geometry" />
+  </mxCell>
+
+  <!-- OncePerRequestFilter -->
+  <mxCell id="oncePerRequest" value="&lt;b&gt;OncePerRequestFilter&lt;/b&gt;&lt;hr/&gt;Spring Security Web Filter Base" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;align=center;verticalAlign=middle;fontColor=#1e293b;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="800" y="150" width="240" height="60" as="geometry" />
+  </mxCell>
+
+  <!-- JwtAuthenticationFilter -->
+  <mxCell id="jwtFilter" value="&lt;b&gt;JwtAuthenticationFilter&lt;/b&gt;&lt;hr/&gt;- JwtService jwtService&lt;br/&gt;- CustomUserDetailsService userDetailsService&lt;hr/&gt;# doFilterInternal(req, res, chain) : void" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccfbf1;strokeColor=#14b8a6;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontColor=#134e4a;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="800" y="270" width="270" height="120" as="geometry" />
+  </mxCell>
+
+  <!-- JwtService -->
+  <mxCell id="jwtService" value="&lt;b&gt;JwtService&lt;/b&gt;&lt;hr/&gt;- SecretKey signingKey&lt;br/&gt;- long expirationMs&lt;hr/&gt;+ generateToken(UserDetails) : String&lt;br/&gt;+ generateToken(UserDetails, Map) : String&lt;br/&gt;+ extractUsername(token) : String&lt;br/&gt;+ isTokenValid(token, UserDetails) : boolean" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccfbf1;strokeColor=#14b8a6;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontColor=#134e4a;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1130" y="250" width="290" height="140" as="geometry" />
+  </mxCell>
+
+  <!-- DTO Records Container -->
+  <mxCell id="dtoContainer" value="&lt;b&gt;IMMUTABLE DATA TRANSFER OBJECTS (Java 21 Records)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#94a3b8;strokeWidth=1.5;dashed=1;align=left;verticalAlign=top;spacingLeft=15;spacingTop=10;fontColor=#334155;" vertex="1" parent="1">
+    <mxGeometry x="60" y="600" width="1380" height="230" as="geometry" />
+  </mxCell>
+
+  <mxCell id="dtoReg" value="&lt;b&gt;&amp;lt;&amp;lt;record&amp;gt;&amp;gt; RegisterRequest&lt;/b&gt;&lt;hr/&gt;+ String name&lt;br/&gt;+ String email&lt;br/&gt;+ String password&lt;br/&gt;+ UserRole role" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontColor=#1e293b;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="90" y="640" width="220" height="100" as="geometry" />
+  </mxCell>
+
+  <mxCell id="dtoJobReq" value="&lt;b&gt;&amp;lt;&amp;lt;record&amp;gt;&amp;gt; CreateJobRequest&lt;/b&gt;&lt;hr/&gt;+ String title, description&lt;br/&gt;+ String category, location&lt;br/&gt;+ BigDecimal payAmount, payUnit&lt;br/&gt;+ Instant startsAt, endsAt&lt;br/&gt;+ Integer capacity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontColor=#1e293b;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="340" y="640" width="250" height="120" as="geometry" />
+  </mxCell>
+
+  <mxCell id="dtoJobRes" value="&lt;b&gt;&amp;lt;&amp;lt;record&amp;gt;&amp;gt; JobResponse&lt;/b&gt;&lt;hr/&gt;+ Long id, employerId&lt;br/&gt;+ String employerName, title&lt;br/&gt;+ int capacity, remainingCapacity&lt;br/&gt;+ long confirmedBookings&lt;br/&gt;+ JobStatus status" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontColor=#1e293b;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="620" y="640" width="250" height="120" as="geometry" />
+  </mxCell>
+
+  <mxCell id="dtoBookRes" value="&lt;b&gt;&amp;lt;&amp;lt;record&amp;gt;&amp;gt; BookingResponse&lt;/b&gt;&lt;hr/&gt;+ Long id, jobId, studentId&lt;br/&gt;+ String jobTitle, studentName&lt;br/&gt;+ BookingStatus status&lt;br/&gt;+ Instant createdAt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontColor=#1e293b;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="900" y="640" width="240" height="110" as="geometry" />
+  </mxCell>
+
+  <mxCell id="dtoAuthRes" value="&lt;b&gt;&amp;lt;&amp;lt;record&amp;gt;&amp;gt; AuthResponse&lt;/b&gt;&lt;hr/&gt;+ String token, tokenType&lt;br/&gt;+ long expiresIn&lt;br/&gt;+ UserResponse user" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontColor=#1e293b;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1170" y="640" width="220" height="90" as="geometry" />
+  </mxCell>
+
+  <!-- Arrows -->
+  <mxCell id="arrImplPrincipal" value="implements" style="endArrow=block;endFill=0;dashed=1;html=1;strokeWidth=2;strokeColor=#0d9488;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="userPrincipal" target="userDetails"><mxGeometry relative="1" as="geometry" /></mxCell>
+  <mxCell id="arrImplCustomUser" value="implements" style="endArrow=block;endFill=0;dashed=1;html=1;strokeWidth=2;strokeColor=#0d9488;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="customUserService" target="userDetailsService"><mxGeometry relative="1" as="geometry" /></mxCell>
+  <mxCell id="arrExtFilter" value="extends" style="endArrow=block;endFill=0;html=1;strokeWidth=2;strokeColor=#14b8a6;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="jwtFilter" target="oncePerRequest"><mxGeometry relative="1" as="geometry" /></mxCell>
+  <mxCell id="arrFilterJwt" style="endArrow=classic;html=1;strokeWidth=1.5;strokeColor=#14b8a6;exitX=1;exitY=0.4;exitDx=0;exitDy=0;entryX=0;entryY=0.4;entryDx=0;entryDy=0;" edge="1" parent="1" source="jwtFilter" target="jwtService"><mxGeometry relative="1" as="geometry" /></mxCell>
+</root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

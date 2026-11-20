@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniShift Backend — OOP Concepts Presentation</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --slide-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --primary-dark: #0284c7;
+            --accent: #818cf8;
+            --accent-green: #34d399;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --code-bg: #090d16;
+            --border: #334155;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f1f5f9;
+            --slide-bg: #ffffff;
+            --text-color: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --accent: #4f46e5;
+            --accent-green: #059669;
+            --card-bg: #f8fafc;
+            --code-bg: #f1f5f9;
+            --border: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Progress Bar */
+        #progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.3s ease;
+        }
+
+        /* Slide Container */
+        #deck-container {
+            width: 90vw;
+            max-width: 1200px;
+            height: 80vh;
+            max-height: 750px;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--slide-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            padding: 48px 56px;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Slide Typography */
+        .slide-header {
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .slide-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.02em;
+        }
+
+        .slide-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Layout Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .badge.green {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--accent-green);
+            border-color: rgba(52, 211, 153, 0.3);
+        }
+
+        .badge.purple {
+            background: rgba(129, 140, 248, 0.15);
+            color: var(--accent);
+            border-color: rgba(129, 140, 248, 0.3);
+        }
+
+        ul {
+            padding-left: 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Code Block */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, monospace;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            color: #e2e8f0;
+        }
+
+        [data-theme="light"] pre {
+            color: #1e293b;
+        }
+
+        code .keyword { color: #f472b6; font-weight: bold; }
+        code .type { color: #38bdf8; }
+        code .method { color: #facc15; }
+        code .string { color: #4ade80; }
+        code .annotation { color: #c084fc; }
+        code .comment { color: #94a3b8; font-style: italic; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: var(--card-bg);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Bottom Controls */
+        #controls {
+            position: fixed;
+            bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--slide-bg);
+            padding: 8px 18px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            z-index: 90;
+        }
+
+        button.btn {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        button.btn:hover {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--primary);
+        }
+
+        #slide-counter {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            min-width: 90px;
+            text-align: center;
+        }
+
+        /* Speaker Notes Drawer */
+        #notes-drawer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: #0b1120;
+            border-top: 2px solid var(--primary);
+            color: #cbd5e1;
+            padding: 20px 40px;
+            display: none;
+            z-index: 95;
+            box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        #notes-drawer.open {
+            display: block;
+        }
+
+        .notes-header {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Slide 1 Hero */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            gap: 16px;
+        }
+
+        .hero h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero h2 {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            max-width: 700px;
+        }
+
+        /* Diagram / ASCII Art */
+        .diagram-box {
+            font-family: monospace;
+            white-space: pre;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            line-height: 1.35;
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+                overflow: visible;
+            }
+            #progress-container, #controls, #notes-drawer {
+                display: none !important;
+            }
+            #deck-container {
+                width: 100%;
+                height: auto;
+                max-width: none;
+                max-height: none;
+            }
+            .slide {
+                position: relative;
+                display: flex !important;
+                opacity: 1 !important;
+                page-break-after: always;
+                margin-bottom: 20px;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Progress Bar -->
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <!-- Presentation Deck Container -->
+    <div id="deck-container">
+
+        <!-- Slide 1: Title / Hero -->
+        <div class="slide active">
+            <div class="hero">
+                <span class="badge purple">UniShift / NextShift Platform</span>
+                <h1>Object-Oriented Programming (OOP) Architecture</h1>
+                <h2>A Deep Dive into Classes, Subclasses, Interfaces, Polymorphism, Encapsulation, Abstraction & Inheritance</h2>
+                <div style="margin-top: 24px; display: flex; gap: 12px;">
+                    <span class="badge">Java 21</span>
+                    <span class="badge green">Spring Boot 3.3.5</span>
+                    <span class="badge purple">Spring Security</span>
+                    <span class="badge">Spring Data JPA</span>
+                </div>
+                <p style="margin-top: 28px; font-size: 0.9rem; color: var(--text-muted);">
+                    Use <strong>Left / Right Arrow</strong> to navigate | Press <strong>N</strong> for Speaker Notes | Press <strong>F</strong> for Fullscreen
+                </p>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Presenter Speech (Sinhala / English):</strong><br>
+                "ආයුබෝවන්. අද මම ඉදිරිපත් කරන්නේ අපගේ UniShift (NextShift) backend ව්‍යාපෘතිය තුළ Object-Oriented Programming (OOP) සංකල්ප ප්‍රායෝගිකව සහ කාර්යක්ෂමව ක්‍රියාත්මක කර ඇති ආකාරය පිළිබඳ තාක්ෂණික විග්‍රහයයි. මෙහිදී Classes, Subclasses, Interfaces, Encapsulation, Abstraction, Polymorphism, සහ Inheritance යන සියලුම මූලධර්ම Java 21 සහ Spring Boot ආශ්‍රයෙන් විස්තර කරනු ඇත."
+            </div>
+        </div>
+
+        <!-- Slide 2: Project Overview & Architecture -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">1. System Overview & Problem Domain</h2>
+                    <p class="slide-subtitle">UniShift: Campus Part-time Job Marketplace Backend</p>
+                </div>
+                <span class="badge">Architecture</span>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div>
+                        <p><strong>UniShift (NextShift)</strong> is a production-ready REST API platform built to connect university students with on-campus and local business vacancies.</p>
+                        <br>
+                        <h3>Key Domain Roles:</h3>
+                        <ul>
+                            <li><strong>Students</strong>: Discover vacancies, book shifts, track booking status.</li>
+                            <li><strong>Employers</strong>: Post shifts, manage shift capacity, review student bookings.</li>
+                            <li><strong>Admins</strong>: Verify employers and approve job posts before public release.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Layered Architectural Flow</h3>
+                        <div class="diagram-box">
+[ HTTP Client / Web Client ]
+             │ JSON Request + Bearer JWT
+             ▼
+[ REST Controllers ] (Presentation Layer)
+             │ Domain method calls
+             ▼
+[ Services ] (Transactional Business Logic)
+        │                   │
+        ▼                   ▼
+[ Strategy Engine ]   [ Repositories ] (Data Access)
+        │                   │
+        └─────────┬─────────┘
+                  ▼
+         [ MySQL / H2 Database ]
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> UniShift backend එක 3-Tier Layered Architecture එකක් අනුගමනය කරනවා. Controllers HTTP requests හසුරුවනවා, Services තුළ business logic සහ transaction boundaries තියෙනවා, Repositories හරහා data persistence සිද්ධ වෙනවා.
+            </div>
+        </div>
+
+        <!-- Slide 3: The 4 OOP Pillars Summary -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">2. OOP Pillars in UniShift Summary</h2>
+                    <p class="slide-subtitle">How core OOP concepts map directly to our code</p>
+                </div>
+                <span class="badge green">Pillars</span>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>1. Encapsulation (කැප්සියුලීකරණය)</h3>
+                        <p>Fields declared <code>private</code>. State changes guarded by domain methods (<code>job.publish()</code>, <code>user.approve()</code>). Request/Response DTOs defined as immutable Java 21 <code>record</code> types.</p>
+                    </div>
+                    <div class="card">
+                        <h3>2. Abstraction (වියුක්තකරණය)</h3>
+                        <p>Abstract mapped superclass <code>BaseEntity</code> hides persistence ID and timestamp mechanics. <code>JobRecommendationStrategy</code> isolates query complexity from services.</p>
+                    </div>
+                    <div class="card">
+                        <h3>3. Polymorphism (බහුරූපතාවය)</h3>
+                        <p>Strategy Pattern allows dynamic runtime swapping of recommendation algorithms. <code>UserPrincipal</code> acts polymorphically as Spring Security's <code>UserDetails</code>.</p>
+                    </div>
+                    <div class="card">
+                        <h3>4. Inheritance (උරුමය)</h3>
+                        <p><code>BaseEntity</code> is extended by <code>User</code>, <code>Job</code>, and <code>Booking</code>. Custom <code>ApiException</code> hierarchy unifies REST error handling and HTTP status mappings.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> වස්තු-පාදක ක්‍රමලේඛනයේ ප්‍රධාන කුළුණු 4ම UniShift තුළ භාවිත කර ඇත. Encapsulation මඟින් දත්ත ආරක්ෂාව, Abstraction මඟින් සංකීර්ණතා සඟවා තැබීම, Polymorphism මඟින් පද්ධතියේ නම්‍යශීලී බව, සහ Inheritance මඟින් කේත නැවත භාවිතය (reusability) තහවුරු කර ඇත.
+            </div>
+        </div>
+
+        <!-- Slide 4: Domain Class Diagram -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">3. Domain Model Class Diagram</h2>
+                    <p class="slide-subtitle">Entities, Associations, and Inheritance Hierarchy</p>
+                </div>
+                <span class="badge purple">Class Diagram</span>
+            </div>
+            <div class="slide-content">
+                <div class="diagram-box" style="font-size: 0.95rem; line-height: 1.45;">
+       ┌────────────────────────────────────────────────────────┐
+       │                <<abstract, MappedSuperclass>>          │
+       │                         BaseEntity                     │
+       │────────────────────────────────────────────────────────│
+       │ - Long id                                              │
+       │ - Instant createdAt                                    │
+       │ - Instant updatedAt                                    │
+       │ #onCreate() / #onUpdate()                              │
+       └───────────────────────────┬────────────────────────────┘
+                                   │ extends (Inheritance)
+         ┌─────────────────────────┼─────────────────────────┐
+         ▼                         ▼                         ▼
+  ┌─────────────┐           ┌─────────────┐           ┌─────────────┐
+  │    User     │ 1       * │     Job     │ 1       * │   Booking   │
+  │─────────────│◄──────────│─────────────│◄──────────│─────────────│
+  │ - name      │ employer  │ - title     │ job       │ - status    │
+  │ - email     │           │ - payAmount │           │ - createdAt │
+  │ - role      │           │ - capacity  │           └─────────────┘
+  │ - approved  │           │ - status    │                  ▲
+  └─────────────┘           └─────────────┘                  │ * student
+         ▲                                                   │
+         └───────────────────────────────────────────────────┘
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> මෙම diagram එකේ දක්නට ලැබෙන්නේ අපගේ ප්‍රධාන Entities තුන වන User, Job, සහ Booking සියල්ලම BaseEntity නම් abstract class එකෙන් උරුම (inherit) වන ආකාරය සහ ඒවා අතර ඇති 1-to-Many associations ය.
+            </div>
+        </div>
+
+        <!-- Slide 5: Classes in UniShift -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">4. Classes (පන්ති)</h2>
+                    <p class="slide-subtitle">Architectural Blueprints mapped to the Single Responsibility Principle</p>
+                </div>
+                <span class="badge">Classes</span>
+            </div>
+            <div class="slide-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Classes</th>
+                            <th>Architectural Responsibility</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Entities</strong></td>
+                            <td><code>User</code>, <code>Job</code>, <code>Booking</code></td>
+                            <td>Database-backed domain state with encapsulated business rules.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Services</strong></td>
+                            <td><code>JobService</code>, <code>BookingService</code>, <code>AuthService</code></td>
+                            <td>Business logic execution, concurrency control, and transactional boundaries.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Controllers</strong></td>
+                            <td><code>JobController</code>, <code>BookingController</code>, <code>AuthController</code></td>
+                            <td>HTTP endpoint routing, JSON request/response transformation.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DTOs (Records)</strong></td>
+                            <td><code>CreateJobRequest</code>, <code>JobResponse</code>, <code>AuthResponse</code></td>
+                            <td>Immutable data carrier classes across network boundaries.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Security</strong></td>
+                            <td><code>JwtService</code>, <code>UserPrincipal</code>, <code>SecurityConfig</code></td>
+                            <td>Authentication, token generation, and role authorization.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> සෑම class එකකටම ඇත්තේ එක් පැහැදිලි වගකීමක් පමණි (Single Responsibility Principle). උදාහරණයක් ලෙස Controller එකකට කිසිදු database query එකක් ලිවිය නොහැකි අතර, එය Service එක හරහා පමණක් සිදු වේ.
+            </div>
+        </div>
+
+        <!-- Slide 6: Subclasses & Hierarchies -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">5. Subclasses & Hierarchies (අනුපන්ති)</h2>
+                    <p class="slide-subtitle">Specialized child classes extending parent functionality</p>
+                </div>
+                <span class="badge">Subclasses</span>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>1. Entity Subclasses</h3>
+                        <p><code>User</code>, <code>Job</code>, and <code>Booking</code> extend <code>BaseEntity</code>.</p>
+                        <pre><code><span class="annotation">@Entity</span>
+<span class="keyword">public class</span> <span class="type">Job</span> <span class="keyword">extends</span> <span class="type">BaseEntity</span> {
+    <span class="keyword">private</span> <span class="type">String</span> title;
+    <span class="keyword">private</span> <span class="type">JobStatus</span> status;
+    <span class="comment">// Inherits id, createdAt, updatedAt</span>
+}</code></pre>
+                    </div>
+                    <div class="card">
+                        <h3>2. Exception Subclasses</h3>
+                        <p>Specialized REST HTTP exceptions extend <code>ApiException</code>:</p>
+                        <pre><code><span class="keyword">public class</span> <span class="type">ConflictException</span> 
+    <span class="keyword">extends</span> <span class="type">ApiException</span> {
+
+    <span class="keyword">public</span> <span class="method">ConflictException</span>(<span class="type">String</span> msg) {
+        <span class="keyword">super</span>(msg, <span class="type">HttpStatus</span>.CONFLICT);
+    }
+}</code></pre>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>3. Security Filter Subclass</h3>
+                    <p><code>JwtAuthenticationFilter extends OncePerRequestFilter</code>: Specializes Spring Security's base filter to intercept HTTP requests and validate JWT tokens.</p>
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> Subclass එකක් මඟින් parent class එකේ fields සහ methods inherit කරගන්නවා. අපේ project එකේ BaseEntity එකෙන් entities 3ක් සහ ApiException එකෙන් ConflictException, ResourceNotFoundException ආදී exceptions inherit වෙනවා.
+            </div>
+        </div>
+
+        <!-- Slide 7: Interfaces -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">6. Interfaces (අතුරුමුහුණත්)</h2>
+                    <p class="slide-subtitle">Decoupling specifications from concrete implementations</p>
+                </div>
+                <span class="badge green">Interfaces</span>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div>
+                        <h3>The Strategy Contract:</h3>
+                        <pre><code><span class="keyword">package</span> com.unishift...recommendation;
+
+<span class="keyword">public interface</span> <span class="type">JobRecommendationStrategy</span> {
+    
+    <span class="type">Page</span>&lt;<span class="type">Job</span>&gt; <span class="method">getRecommendedJobs</span>(
+        <span class="type">Long</span> studentId,
+        <span class="type">String</span> category,
+        <span class="type">String</span> location,
+        <span class="type">Pageable</span> pageable
+    );
+}</code></pre>
+                        <ul style="margin-top: 12px;">
+                            <li>Defines <em>what</em> needs to be computed without binding to <em>how</em>.</li>
+                            <li>Enables Dependency Inversion Principle (DIP).</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Persistence Interfaces:</h3>
+                        <pre><code><span class="keyword">public interface</span> <span class="type">JobRepository</span> 
+    <span class="keyword">extends</span> <span class="type">JpaRepository</span>&lt;<span class="type">Job</span>, <span class="type">Long</span>&gt; {
+    
+    <span class="annotation">@Lock</span>(<span class="type">LockModeType</span>.PESSIMISTIC_WRITE)
+    <span class="type">Optional</span>&lt;<span class="type">Job</span>&gt; <span class="method">findByIdWithLock</span>(<span class="type">Long</span> id);
+}</code></pre>
+                        <h3 style="margin-top: 16px;">Security Interfaces:</h3>
+                        <p><code>UserDetails</code> and <code>UserDetailsService</code> provide standardized framework contracts implemented by <code>UserPrincipal</code> and <code>CustomUserDetailsService</code>.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> Interface එකක් කියන්නේ contract එකක්. JobRecommendationStrategy මඟින් රැකියා තෝරාදීමේ algorithm එක service layer එකෙන් සම්පූර්ණයෙන්ම වෙන් (decouple) කරලා තියෙනවා.
+            </div>
+        </div>
+
+        <!-- Slide 8: Polymorphism - Strategy Pattern -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">7. Polymorphism: Strategy Pattern</h2>
+                    <p class="slide-subtitle">Subtype Polymorphism enabling dynamic algorithm injection</p>
+                </div>
+                <span class="badge purple">Polymorphism</span>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div>
+                        <h3>1. Consumer depends on Interface:</h3>
+                        <pre><code><span class="annotation">@Service</span>
+<span class="keyword">public class</span> <span class="type">JobService</span> {
+    <span class="comment">// Injected polymorphically</span>
+    <span class="keyword">private final</span> <span class="type">JobRecommendationStrategy</span> strategy;
+
+    <span class="keyword">public</span> <span class="type">Page</span>&lt;<span class="type">JobResponse</span>&gt; <span class="method">getPublishedJobs</span>(...) {
+        <span class="comment">// Polymorphic dispatch at runtime</span>
+        <span class="type">Page</span>&lt;<span class="type">Job</span>&gt; jobs = strategy.<span class="method">getRecommendedJobs</span>(...);
+        <span class="keyword">return</span> jobs.map(<span class="type">JobResponse</span>::fromEntity);
+    }
+}</code></pre>
+                    </div>
+                    <div>
+                        <h3>2. Concrete Implementation:</h3>
+                        <pre><code><span class="annotation">@Component</span>
+<span class="annotation">@Primary</span>
+<span class="keyword">public class</span> <span class="type">AllPublishedJobsStrategy</span> 
+    <span class="keyword">implements</span> <span class="type">JobRecommendationStrategy</span> {
+
+    <span class="annotation">@Override</span>
+    <span class="keyword">public</span> <span class="type">Page</span>&lt;<span class="type">Job</span>&gt; <span class="method">getRecommendedJobs</span>(...) {
+        <span class="keyword">return</span> jobRepository.findEligibleJobs(...);
+    }
+}</code></pre>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 10px;">
+                    <strong>Open/Closed Principle (OCP) In Action:</strong> If tomorrow we build an AI-based or GPS-distance ranking engine, we write a new class implementing <code>JobRecommendationStrategy</code>. <code>JobService</code> and <code>JobController</code> require <strong>zero</strong> modifications!
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> Polymorphism හෙවත් බහුරූපතාවය මෙහි ප්‍රධාන ලෙස Strategy Pattern හරහා යොදාගෙන තිබෙනවා. JobService එක direct class එකක් වෙනුවට JobRecommendationStrategy interface එක call කරන නිසා, runtime එකේදී කැමති algorithm එකක් switch කරන්න පුළුවන්.
+            </div>
+        </div>
+
+        <!-- Slide 9: Method Overriding and Overloading -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">8. Method Overriding & Overloading</h2>
+                    <p class="slide-subtitle">Runtime vs. Compile-time Polymorphism in UniShift</p>
+                </div>
+                <span class="badge">Polymorphism</span>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Method Overriding (Dynamic Polymorphism)</h3>
+                        <p>Providing specialized subclass behavior for inherited methods:</p>
+                        <pre><code><span class="comment">// In BaseEntity.java: Overriding Object.equals</span>
+<span class="annotation">@Override</span>
+<span class="keyword">public boolean</span> <span class="method">equals</span>(<span class="type">Object</span> o) {
+    <span class="keyword">if</span> (<span class="keyword">this</span> == o) <span class="keyword">return true</span>;
+    <span class="keyword">if</span> (o == <span class="keyword">null</span> || getClass() != o.getClass()) 
+        <span class="keyword">return false</span>;
+    <span class="type">BaseEntity</span> that = (<span class="type">BaseEntity</span>) o;
+    <span class="keyword">return</span> id != <span class="keyword">null</span> &amp;&amp; <span class="type">Objects</span>.equals(id, that.id);
+}</code></pre>
+                        <p style="font-size: 0.9rem; margin-top: 8px;">Guarantees entity equality is determined strictly by persistent primary key identity.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Method Overloading (Static Polymorphism)</h3>
+                        <p>Same method name with different parameter signatures:</p>
+                        <pre><code><span class="comment">// In JwtService.java: Overloaded token generator</span>
+<span class="keyword">public</span> <span class="type">String</span> <span class="method">generateToken</span>(<span class="type">UserDetails</span> userDetails) {
+    <span class="keyword">return</span> generateToken(userDetails, <span class="type">Collections</span>.emptyMap());
+}
+
+<span class="keyword">public</span> <span class="type">String</span> <span class="method">generateToken</span>(
+    <span class="type">UserDetails</span> userDetails, 
+    <span class="type">Map</span>&lt;<span class="type">String</span>, <span class="type">Object</span>&gt; extraClaims
+) {
+    <span class="comment">// Generates token with extra role/user claims</span>
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> Overriding යනු මව් පන්තියේ ඇති method එකක් child class එක තුළ අලුතින් ලිවීමයි (@Override). Overloading යනු එකම නම ඇති නමුත් parameters වෙනස් methods එකම class එක තුළ ලිවීමයි.
+            </div>
+        </div>
+
+        <!-- Slide 10: Encapsulation - Domain Models -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">9. Encapsulation: Data Hiding & Rich Models</h2>
+                    <p class="slide-subtitle">Guarding business invariants within entities</p>
+                </div>
+                <span class="badge green">Encapsulation</span>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div>
+                        <h3>Strict Data Hiding:</h3>
+                        <ul>
+                            <li>All fields in <code>User</code>, <code>Job</code>, and <code>Booking</code> are <code>private</code>.</li>
+                            <li>Direct external modification is prohibited.</li>
+                        </ul>
+                        <br>
+                        <h3>Rich Domain Methods in <code>Job.java</code>:</h3>
+                        <pre><code><span class="comment">// Atomic state transition</span>
+<span class="keyword">public void</span> <span class="method">publish</span>() {
+    <span class="keyword">this</span>.status = <span class="type">JobStatus</span>.PUBLISHED;
+    <span class="keyword">this</span>.publishedAt = <span class="type">Instant</span>.now();
+}
+
+<span class="keyword">public void</span> <span class="method">reject</span>() {
+    <span class="keyword">this</span>.status = <span class="type">JobStatus</span>.REJECTED;
+}</code></pre>
+                    </div>
+                    <div class="card">
+                        <h3>Encapsulated Business Rule:</h3>
+                        <pre><code><span class="keyword">public boolean</span> <span class="method">isEligibleForBooking</span>(<span class="type">Instant</span> now) {
+    <span class="keyword">return this</span>.status == <span class="type">JobStatus</span>.PUBLISHED
+            &amp;&amp; <span class="keyword">this</span>.employer != <span class="keyword">null</span>
+            &amp;&amp; <span class="keyword">this</span>.employer.isActive()
+            &amp;&amp; <span class="keyword">this</span>.employer.isApproved()
+            &amp;&amp; <span class="keyword">this</span>.startsAt.isAfter(now);
+}</code></pre>
+                        <ul style="margin-top: 12px; font-size: 0.95rem;">
+                            <li>Prevents Anemic Domain Models.</li>
+                            <li>Keeps domain rules bundled directly with the data they evaluate.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> Encapsulation හිදී fields `private` කිරීම පමණක් නොව, state changes සඳහා ආරක්ෂිත methods (Rich Domain Model) සෑදීම සිදු කර ඇත. උදාහරණයක් ලෙස job.publish() මඟින් status සහ publishedAt එකවර update වේ.
+            </div>
+        </div>
+
+        <!-- Slide 11: Encapsulation - Immutability with Records -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">10. Encapsulation: Immutability with Records</h2>
+                    <p class="slide-subtitle">Tamper-proof DTOs using Java 21 Records</p>
+                </div>
+                <span class="badge">Encapsulation</span>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div>
+                        <pre><code><span class="keyword">public record</span> <span class="type">CreateJobRequest</span>(
+    <span class="annotation">@NotBlank</span> <span class="type">String</span> title,
+    <span class="annotation">@NotBlank</span> <span class="type">String</span> description,
+    <span class="annotation">@NotBlank</span> <span class="type">String</span> category,
+    <span class="annotation">@NotBlank</span> <span class="type">String</span> location,
+    <span class="annotation">@NotNull</span> <span class="annotation">@DecimalMin</span>(<span class="string">"0.01"</span>) <span class="type">BigDecimal</span> payAmount,
+    <span class="annotation">@NotBlank</span> <span class="type">String</span> payUnit,
+    <span class="annotation">@NotNull</span> <span class="type">Instant</span> startsAt,
+    <span class="annotation">@NotNull</span> <span class="type">Instant</span> endsAt,
+    <span class="annotation">@NotNull</span> <span class="annotation">@Min</span>(1) <span class="type">Integer</span> capacity
+) {}</code></pre>
+                    </div>
+                    <div class="card">
+                        <h3>Why Java 21 Records?</h3>
+                        <ul>
+                            <li><strong>Built-in Encapsulation</strong>: All fields are automatically <code>private</code> and <code>final</code>.</li>
+                            <li><strong>No Setter Pollution</strong>: Records cannot be modified after construction $\rightarrow$ <em>Immutability</em>.</li>
+                            <li><strong>Thread-Safe</strong>: Safe to share across asynchronous and multi-threaded contexts without concurrency bugs.</li>
+                            <li><strong>Boundary Isolation</strong>: Client API requests cannot corrupt or mutate internal entity representations.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> API එකෙන් එන සහ පිටවන දත්ත (DTOs) සඳහා Java 21 Records භාවිතා කර ඇත. Records වල සියලුම fields immutable (final) වන බැවින්, දත්ත අතරමගදී වෙනස් විය නොහැකි අතර පද්ධතියේ Thread-safety ආරක්ෂා වේ.
+            </div>
+        </div>
+
+        <!-- Slide 12: Abstraction -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">11. Abstraction (වියුක්තකරණය)</h2>
+                    <p class="slide-subtitle">Hiding underlying mechanics behind clean interfaces</p>
+                </div>
+                <span class="badge purple">Abstraction</span>
+            </div>
+            <div class="slide-content">
+                <div class="grid-3">
+                    <div class="card">
+                        <h3>1. Abstract Class: BaseEntity</h3>
+                        <p>Abstracts ID generation, creation timestamps, and lifecycle callbacks (<code>@PrePersist</code>, <code>@PreUpdate</code>) so entity subclasses never handle audit plumbing.</p>
+                    </div>
+                    <div class="card">
+                        <h3>2. Recommendation Abstraction</h3>
+                        <p><code>JobRecommendationStrategy</code> abstracts complex database queries, pagination, and sorting from <code>JobService</code> and <code>JobController</code>.</p>
+                    </div>
+                    <div class="card">
+                        <h3>3. Repository Abstraction</h3>
+                        <p>Spring Data JPA abstracts JDBC drivers, connection pools, and raw SQL behind simple, expressive Java method declarations.</p>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 14px;">
+                    <h3>Architectural Abstraction: Three-Tier Decoupling</h3>
+                    <p><strong>Controllers</strong> abstract HTTP protocols &nbsp;$\rightarrow$&nbsp; <strong>Services</strong> abstract business rules &nbsp;$\rightarrow$&nbsp; <strong>Repositories</strong> abstract persistence &nbsp;$\rightarrow$&nbsp; <strong>Database</strong> abstracts physical storage.</p>
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> Abstraction මඟින් අභ්‍යන්තරයේ සිදුවන සංකීර්ණ තාක්ෂණික කාර්යයන් සඟවයි. BaseEntity abstract class එක මඟින් ID සහ Timestamps හසුරුවන ආකාරය සඟවා ඇති අතර, Repository මඟින් SQL සහ database queries සඟවා ඇත.
+            </div>
+        </div>
+
+        <!-- Slide 13: Inheritance & Composition Decision -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">12. Inheritance & Architectural Decisions</h2>
+                    <p class="slide-subtitle">When to use Inheritance vs. "Favor Composition over Inheritance"</p>
+                </div>
+                <span class="badge">Inheritance</span>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Where We Used Inheritance:</h3>
+                        <p><strong>Technical Infrastructure Reuse</strong>:</p>
+                        <ul>
+                            <li><code>BaseEntity</code> $\rightarrow$ <code>User</code>, <code>Job</code>, <code>Booking</code>.</li>
+                            <li><code>ApiException</code> $\rightarrow$ <code>ConflictException</code>, <code>ResourceNotFoundException</code>, etc.</li>
+                            <li><code>OncePerRequestFilter</code> $\rightarrow$ <code>JwtAuthenticationFilter</code>.</li>
+                        </ul>
+                        <p style="margin-top: 8px;"><strong>Outcome</strong>: DRY (Don't Repeat Yourself) compliance and uniform timestamp auditing.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Where We Avoided Inheritance:</h3>
+                        <p><strong>Entity Roles: "Favor Composition"</strong>:</p>
+                        <p>Why <em>not</em> <code>Student extends User</code> in JPA?</p>
+                        <ul>
+                            <li><strong>JPA Pitfall</strong>: Table inheritance creates sparse tables with NULL columns or expensive SQL JOINs.</li>
+                            <li><strong>Our Solution</strong>: Composition via <code>UserRole</code> enum and boolean flags. Allows clean querying and zero database join overhead.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> Inheritance තාක්ෂණික පොදු දේවල් සඳහා (BaseEntity, Exceptions) යොදාගන්නා ලදී. නමුත් UserRole සඳහා Student extends User ලෙස JPA table inheritance නොසාදා, Composition (Favor composition over inheritance) මූලධර්මය පිළිපදින ලදී.
+            </div>
+        </div>
+
+        <!-- Slide 14: SOLID Principles Alignment -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">13. SOLID Principles in UniShift</h2>
+                    <p class="slide-subtitle">Industry best practices applied throughout the codebase</p>
+                </div>
+                <span class="badge green">SOLID</span>
+            </div>
+            <div class="slide-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Principle</th>
+                            <th>Implementation in UniShift</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>S - Single Responsibility</strong></td>
+                            <td>Strict separation: Controllers (HTTP), Services (Domain rules), Repositories (Data access).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>O - Open/Closed</strong></td>
+                            <td><code>JobRecommendationStrategy</code> can be extended with new algorithms without modifying <code>JobService</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>L - Liskov Substitution</strong></td>
+                            <td><code>AllPublishedJobsStrategy</code> seamlessly substitutes <code>JobRecommendationStrategy</code>. <code>UserPrincipal</code> substitutes <code>UserDetails</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>I - Interface Segregation</strong></td>
+                            <td>Small, purposeful interfaces (e.g. <code>JobRecommendationStrategy</code> defines only one focused method).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>D - Dependency Inversion</strong></td>
+                            <td><code>JobService</code> depends on the abstraction <code>JobRecommendationStrategy</code>, not the concrete implementation.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> SOLID මූලධර්ම පහම අපගේ කේතය තුළ නිරූපණය වේ. විශේෂයෙන් Dependency Inversion සහ Open/Closed මූලධර්ම recommendation engine එක තුළ Strategy Pattern මඟින් පැහැදිලිව ක්‍රියාත්මක කර ඇත.
+            </div>
+        </div>
+
+        <!-- Slide 15: Viva Questions & Cheatsheet -->
+        <div class="slide">
+            <div class="slide-header">
+                <div>
+                    <h2 class="slide-title">14. Viva / Evaluation Questions Cheatsheet</h2>
+                    <p class="slide-subtitle">Common questions panelists ask and how to answer them</p>
+                </div>
+                <span class="badge purple">Viva Q&A</span>
+            </div>
+            <div class="slide-content">
+                <div class="card">
+                    <strong>Q1: Where did you use the Strategy Pattern?</strong><br>
+                    <span style="color: var(--text-muted);">Answer:</span> In <code>JobRecommendationStrategy</code> interface and <code>AllPublishedJobsStrategy</code> implementation injected into <code>JobService</code>. Demonstrates Subtype Polymorphism and OCP.
+                </div>
+                <div class="card">
+                    <strong>Q2: Why use `BaseEntity`?</strong><br>
+                    <span style="color: var(--text-muted);">Answer:</span> Encapsulates common persistence state (<code>id</code>, <code>createdAt</code>, <code>updatedAt</code>) and lifecycle hooks (<code>@PrePersist</code>). Promotes Abstraction and Inheritance (DRY principle).
+                </div>
+                <div class="card">
+                    <strong>Q3: How do you prevent anemic domain models?</strong><br>
+                    <span style="color: var(--text-muted);">Answer:</span> Via Encapsulation. Entities expose domain methods with business invariants (e.g., <code>job.publish()</code>, <code>job.isEligibleForBooking()</code>) rather than blind setters.
+                </div>
+                <div class="card">
+                    <strong>Q4: Why not create `Student` and `Employer` as subclasses of `User` in JPA?</strong><br>
+                    <span style="color: var(--text-muted);">Answer:</span> To prevent relational database overhead (joins or sparse null columns), following the OOP principle: <em>"Favor composition over inheritance for entity roles"</em>.
+                </div>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> Viva එකේදී අහන ප්‍රධාන ප්‍රශ්න 4ට කෙටි සහ නිවැරදි තාක්ෂණික පිළිතුරු මෙහි දක්වා ඇත.
+            </div>
+        </div>
+
+        <!-- Slide 16: Conclusion & Thank You -->
+        <div class="slide">
+            <div class="hero">
+                <span class="badge green">Summary & Conclusion</span>
+                <h1>Thank You!</h1>
+                <h2>UniShift Backend demonstrates a clean, maintainable, and extensible Object-Oriented Architecture.</h2>
+                <div style="margin-top: 30px; display: flex; gap: 20px;">
+                    <div class="card" style="text-align: left; max-width: 300px;">
+                        <h3 style="color: var(--primary);">Clean Code</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Strict separation of concerns and high cohesion across all layers.</p>
+                    </div>
+                    <div class="card" style="text-align: left; max-width: 300px;">
+                        <h3 style="color: var(--accent-green);">Extensible</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Strategy Pattern and Interfaces allow seamless addition of features.</p>
+                    </div>
+                    <div class="card" style="text-align: left; max-width: 300px;">
+                        <h3 style="color: var(--accent);">Robust</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Encapsulated business invariants and concurrency safeguards.</p>
+                    </div>
+                </div>
+                <h3 style="margin-top: 24px; color: var(--primary);">Any Questions? (Q&A)</h3>
+            </div>
+            <div class="speaker-notes" style="display: none;">
+                <strong>Notes:</strong> අවසාන වශයෙන් ප්‍රශ්න විමසීමට විනිශ්චය මණ්ඩලයට ආරාධනා කරන්න.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Speaker Notes Drawer -->
+    <div id="notes-drawer">
+        <div class="notes-header">
+            <span>Speaker Notes (Presenter View)</span>
+            <span style="cursor: pointer;" onclick="toggleNotes()">✕ Close</span>
+        </div>
+        <div id="notes-content">No notes for this slide.</div>
+    </div>
+
+    <!-- Bottom Navigation Controls -->
+    <div id="controls">
+        <button class="btn" onclick="prevSlide()" title="Previous Slide (Left Arrow)">◀ Prev</button>
+        <span id="slide-counter">1 / 16</span>
+        <button class="btn" onclick="nextSlide()" title="Next Slide (Right Arrow)">Next ▶</button>
+        <button class="btn" onclick="toggleNotes()" title="Toggle Speaker Notes (N)">📝 Notes</button>
+        <button class="btn" onclick="toggleFullscreen()" title="Toggle Fullscreen (F)">⛶ Fullscreen</button>
+        <button class="btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode (T)">🌓 Theme</button>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress-bar');
+        const slideCounter = document.getElementById('slide-counter');
+        const notesDrawer = document.getElementById('notes-drawer');
+        const notesContent = document.getElementById('notes-content');
+        let currentSlide = 0;
+
+        function updateSlide() {
+            slides.forEach((slide, idx) => {
+                slide.classList.remove('active');
+                if (idx === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            // Update Progress Bar
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = progress + '%';
+
+            // Update Counter
+            slideCounter.textContent = `${currentSlide + 1} / ${slides.length}`;
+
+            // Update Speaker Notes
+            const activeSlide = slides[currentSlide];
+            const notes = activeSlide.querySelector('.speaker-notes');
+            if (notes) {
+                notesContent.innerHTML = notes.innerHTML;
+            } else {
+                notesContent.innerHTML = '<em>No speaker notes for this slide.</em>';
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function toggleNotes() {
+            notesDrawer.classList.toggle('open');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => alert(err.message));
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            if (currentTheme === 'light') {
+                document.body.removeAttribute('data-theme');
+            } else {
+                document.body.setAttribute('data-theme', 'light');
+            }
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') {
+                prevSlide();
+            } else if (e.key === 'n' || e.key === 'N') {
+                toggleNotes();
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+            } else if (e.key === 't' || e.key === 'T') {
+                toggleTheme();
+            } else if (e.key === 'Home') {
+                currentSlide = 0;
+                updateSlide();
+            } else if (e.key === 'End') {
+                currentSlide = slides.length - 1;
+                updateSlide();
+            }
+        });
+
+        // Initialize
+        updateSlide();
+    </script>
+</body>
+</html>
