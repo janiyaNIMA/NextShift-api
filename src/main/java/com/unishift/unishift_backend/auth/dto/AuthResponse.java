@@ -21,5 +21,10 @@ public record AuthResponse(
     public String tokenTypeAlias() {
         return tokenType;
     }
+
+    @JsonProperty("expires_in")
+    public long expiresInAlias() {
+        return expiresIn;
+    }
 }
 
