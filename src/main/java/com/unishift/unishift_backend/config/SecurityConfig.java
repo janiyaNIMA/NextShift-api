@@ -57,7 +57,8 @@ public class SecurityConfig {
                 .accessDeniedHandler(accessDeniedHandler())
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/health").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/health", "/api/v1/health").permitAll()
                 .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/jobs", "/api/v1/jobs/*").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
@@ -65,6 +66,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/employer/**").hasRole("EMPLOYER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/jobs/*/bookings").hasRole("STUDENT")
                 .requestMatchers("/api/v1/bookings/me").hasRole("STUDENT")
+                .requestMatchers(HttpMethod.GET, "/api/v1/students/me/gamification/tiers").authenticated()
+                .requestMatchers("/api/v1/students/me/gamification/**").hasRole("STUDENT")
+                .requestMatchers(HttpMethod.POST, "/api/v1/bookings/*/work-sessions").hasRole("STUDENT")
+                .requestMatchers(HttpMethod.GET, "/api/v1/bookings/*/work-sessions").authenticated()
                 .requestMatchers("/api/v1/auth/me").authenticated()
                 .anyRequest().authenticated()
             )
@@ -121,7 +126,7 @@ public class SecurityConfig {
         return (request, response, authException) -> {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            String json = "{\"timestamp\":\"" + Instant.now() + "\",\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Authentication required or token invalid\"}";
+            String json = "{\"timestamp\":\"" + Instant.now() + "\",\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Authentication required or token invalid\",\"detail\":\"Authentication required or token invalid\"}";
             response.getWriter().write(json);
         };
     }
@@ -131,7 +136,7 @@ public class SecurityConfig {
         return (request, response, accessDeniedException) -> {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            String json = "{\"timestamp\":\"" + Instant.now() + "\",\"status\":403,\"error\":\"Forbidden\",\"message\":\"Access denied: insufficient permissions\"}";
+            String json = "{\"timestamp\":\"" + Instant.now() + "\",\"status\":403,\"error\":\"Forbidden\",\"message\":\"Access denied: insufficient permissions\",\"detail\":\"Access denied: insufficient permissions\"}";
             response.getWriter().write(json);
         };
     }

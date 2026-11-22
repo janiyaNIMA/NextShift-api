@@ -34,6 +34,9 @@ public class Booking extends BaseEntity {
     @Column(nullable = false)
     private BookingStatus status = BookingStatus.CONFIRMED;
 
+    @jakarta.persistence.OneToMany(mappedBy = "booking", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<com.unishift.unishift_backend.gamification.entity.WorkSession> workSessions = new java.util.ArrayList<>();
+
     public Booking() {
     }
 

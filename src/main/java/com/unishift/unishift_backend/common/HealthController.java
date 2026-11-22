@@ -11,7 +11,7 @@ import java.util.Map;
 @RestController
 public class HealthController {
 
-    @GetMapping("/health")
+    @GetMapping({"/health", "/api/v1/health"})
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "ok");

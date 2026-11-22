@@ -30,6 +30,12 @@ public class User extends BaseEntity {
     @Column(name = "is_approved", nullable = false)
     private boolean approved = false;
 
+    @jakarta.persistence.OneToMany(mappedBy = "student", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<com.unishift.unishift_backend.gamification.entity.PointTransaction> pointTransactions = new java.util.ArrayList<>();
+
+    @jakarta.persistence.OneToOne(mappedBy = "student", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private com.unishift.unishift_backend.gamification.entity.StudentGamification gamification;
+
     public User() {
     }
 
