@@ -209,4 +209,91 @@ public class JobWorkflowTest {
             .andExpect(jsonPath("$.title", is("Tutor")))
             .andExpect(jsonPath("$.remainingCapacity", is(2)));
     }
+
+    @Test
+    void publishedJobsFeedSupportsSorting() throws Exception {
+        User employer = new User(
+            "Library",
+            "library.sort@uni.edu",
+            passwordEncoder.encode("Password123!"),
+            UserRole.EMPLOYER,
+            true,
+            true
+        );
+        userRepository.save(employer);
+
+        Instant startsAtEarlier = Instant.now().plus(2, ChronoUnit.DAYS);
+        Instant startsAtLater = Instant.now().plus(5, ChronoUnit.DAYS);
+
+        Job jobEarly = new Job(
+            employer,
+            "Early Shift",
+            "Early morning shift",
+            "Retail",
+            "Shop A",
+            new BigDecimal("15.00"),
+            "HOURLY",
+            startsAtEarlier,
+            startsAtEarlier.plus(2, ChronoUnit.HOURS),
+            3
+        );
+        jobEarly.publish();
+        jobRepository.save(jobEarly);
+
+        Job jobLate = new Job(
+            employer,
+            "Late Shift",
+            "Late afternoon shift",
+            "Retail",
+            "Shop B",
+            new BigDecimal("18.00"),
+            "HOURLY",
+            startsAtLater,
+            startsAtLater.plus(2, ChronoUnit.HOURS),
+            3
+        );
+        jobLate.publish();
+        jobRepository.save(jobLate);
+
+        mockMvc.perform(get("/api/v1/jobs?sort=startsAt,asc"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].title", is("Early Shift")))
+            .andExpect(jsonPath("$.content[1].title", is("Late Shift")));
+    }
+
+    @Test
+    void getJobByIdReturnsNotFoundForUnpublishedOrNonExistentJob() throws Exception {
+        mockMvc.perform(get("/api/v1/jobs/99999"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status", is(404)));
+
+        User employer = new User(
+            "Cafe",
+            "cafe.pending@uni.edu",
+            passwordEncoder.encode("Password123!"),
+            UserRole.EMPLOYER,
+            true,
+            true
+        );
+        userRepository.save(employer);
+
+        Instant startsAt = Instant.now().plus(2, ChronoUnit.DAYS);
+        Job pendingJob = new Job(
+            employer,
+            "Pending Shift",
+            "Pending approval shift",
+            "Hospitality",
+            "Cafe",
+            new BigDecimal("15.00"),
+            "HOURLY",
+            startsAt,
+            startsAt.plus(2, ChronoUnit.HOURS),
+            2
+        );
+        jobRepository.save(pendingJob);
+
+        mockMvc.perform(get("/api/v1/jobs/" + pendingJob.getId()))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status", is(404)));
+    }
 }

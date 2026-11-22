@@ -18,15 +18,17 @@ import java.util.Optional;
 public interface JobRepository extends JpaRepository<Job, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT j FROM Job j WHERE j.id = :id")
+    @Query("SELECT j FROM Job j JOIN FETCH j.employer WHERE j.id = :id")
     Optional<Job> findByIdWithLock(@Param("id") Long id);
 
     @Query("SELECT j FROM Job j JOIN FETCH j.employer WHERE j.id = :id")
     Optional<Job> findByIdWithEmployer(@Param("id") Long id);
 
-    List<Job> findByEmployerIdOrderByCreatedAtDesc(Long employerId);
+    @Query("SELECT j FROM Job j JOIN FETCH j.employer WHERE j.employer.id = :employerId ORDER BY j.createdAt DESC")
+    List<Job> findByEmployerIdOrderByCreatedAtDesc(@Param("employerId") Long employerId);
 
-    List<Job> findByStatusOrderByCreatedAtDesc(JobStatus status);
+    @Query("SELECT j FROM Job j JOIN FETCH j.employer WHERE j.status = :status ORDER BY j.createdAt DESC")
+    List<Job> findByStatusOrderByCreatedAtDesc(@Param("status") JobStatus status);
 
     @Query(
         value = """
@@ -42,7 +44,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
                   SELECT COUNT(b) FROM Booking b
                   WHERE b.job = j AND b.status = :confirmedStatus
               )
-            ORDER BY j.publishedAt DESC, j.id DESC
         """,
         countQuery = """
             SELECT COUNT(j) FROM Job j

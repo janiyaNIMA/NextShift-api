@@ -1,12 +1,14 @@
 package com.unishift.unishift_backend.booking;
 
 import com.unishift.unishift_backend.booking.dto.BookingResponse;
+import com.unishift.unishift_backend.common.exception.BadRequestException;
 import com.unishift.unishift_backend.common.exception.ConflictException;
 import com.unishift.unishift_backend.common.exception.ForbiddenException;
 import com.unishift.unishift_backend.common.exception.ResourceNotFoundException;
 import com.unishift.unishift_backend.job.Job;
 import com.unishift.unishift_backend.job.JobRepository;
 import com.unishift.unishift_backend.job.JobService;
+import com.unishift.unishift_backend.job.JobStatus;
 import com.unishift.unishift_backend.user.User;
 import com.unishift.unishift_backend.user.UserRepository;
 import org.springframework.stereotype.Service;
@@ -51,17 +53,25 @@ public class BookingService {
         Job job = jobRepository.findByIdWithLock(jobId)
             .orElseThrow(() -> new ResourceNotFoundException("Job not found: " + jobId));
 
-        if (!job.isEligibleForBooking(Instant.now())) {
-            throw new ConflictException("Job is not currently eligible for booking");
+        if (job.getStatus() != JobStatus.PUBLISHED) {
+            throw new ResourceNotFoundException("Job is not published: " + jobId);
+        }
+
+        if (!job.getStartsAt().isAfter(Instant.now())) {
+            throw new BadRequestException("Shift start time has already passed");
+        }
+
+        if (job.getEmployer() == null || !job.getEmployer().isActive() || !job.getEmployer().isApproved()) {
+            throw new BadRequestException("Job vacancy is ineligible");
         }
 
         if (bookingRepository.existsByJobIdAndStudentId(jobId, student.getId())) {
-            throw new ConflictException("Student has already booked this vacancy");
+            throw new ConflictException("You have already booked this job");
         }
 
         long confirmedCount = bookingRepository.countByJobIdAndStatus(jobId, BookingStatus.CONFIRMED);
         if (confirmedCount >= job.getCapacity()) {
-            throw new ConflictException("Job booking capacity has been reached");
+            throw new ConflictException("Job capacity has been reached");
         }
 
         Booking booking = new Booking(job, student, BookingStatus.CONFIRMED);

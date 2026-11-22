@@ -100,10 +100,6 @@ public class JobService {
         }
 
         long confirmedBookings = bookingRepository.countByJobIdAndStatus(job.getId(), BookingStatus.CONFIRMED);
-        if (confirmedBookings >= job.getCapacity()) {
-            throw new ResourceNotFoundException("Job capacity has been reached: " + id);
-        }
-
         return JobResponse.fromEntity(job, confirmedBookings);
     }
 

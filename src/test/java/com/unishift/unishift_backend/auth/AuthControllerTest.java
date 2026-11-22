@@ -229,4 +229,39 @@ public class AuthControllerTest {
             .andExpect(jsonPath("$.email", is("alice.me@example.com")))
             .andExpect(jsonPath("$.role", is("STUDENT")));
     }
+
+    @Test
+    void loginWithDeactivatedAccountReturnsForbidden() throws Exception {
+        com.unishift.unishift_backend.user.User inactiveUser = new com.unishift.unishift_backend.user.User(
+            "Inactive User",
+            "inactive@uni.edu",
+            context.getBean(org.springframework.security.crypto.password.PasswordEncoder.class).encode("Password123!"),
+            com.unishift.unishift_backend.user.UserRole.STUDENT,
+            false,
+            true
+        );
+        userRepository.save(inactiveUser);
+
+        String loginJson = """
+            {
+                "email": "inactive@uni.edu",
+                "password": "Password123!"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.status", is(403)));
+    }
+
+    @Test
+    void malformedJsonReturnsBadRequest() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ bad-json }"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status", is(400)));
+    }
 }

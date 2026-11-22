@@ -12,13 +12,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class AdminBootstrapConfig {
 
-    @Value("${FIRST_ADMIN_NAME:${app.admin.name:Platform Administrator}}")
+    @Value("${FIRST_ADMIN_NAME:${ADMIN_NAME:Platform Administrator}}")
     private String adminName;
 
-    @Value("${FIRST_ADMIN_EMAIL:${app.admin.email:}}")
+    @Value("${FIRST_ADMIN_EMAIL:${ADMIN_EMAIL:admin@unishift.com}}")
     private String adminEmail;
 
-    @Value("${FIRST_ADMIN_PASSWORD:${app.admin.password:}}")
+    @Value("${FIRST_ADMIN_PASSWORD:${ADMIN_PASSWORD:AdminSecurePassword123!}}")
     private String adminPassword;
 
     @Bean
@@ -28,10 +28,11 @@ public class AdminBootstrapConfig {
                 return;
             }
 
-            if (!userRepository.existsByEmail(adminEmail)) {
+            String normalizedEmail = adminEmail.trim().toLowerCase();
+            if (!userRepository.existsByEmail(normalizedEmail)) {
                 User admin = new User(
                     adminName != null && !adminName.isBlank() ? adminName : "Platform Administrator",
-                    adminEmail.trim().toLowerCase(),
+                    normalizedEmail,
                     passwordEncoder.encode(adminPassword),
                     UserRole.ADMIN,
                     true,

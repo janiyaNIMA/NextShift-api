@@ -67,11 +67,15 @@ public class AdminService {
 
     @Transactional
     public JobResponse approveJob(Long id) {
-        Job job = jobRepository.findById(id)
+        Job job = jobRepository.findByIdWithEmployer(id)
             .orElseThrow(() -> new ResourceNotFoundException("Job not found: " + id));
 
         if (job.getStatus() != JobStatus.PENDING) {
             throw new BadRequestException("Only pending jobs can be approved. Current status: " + job.getStatus());
+        }
+
+        if (job.getEmployer() == null || !job.getEmployer().isActive() || !job.getEmployer().isApproved()) {
+            throw new BadRequestException("Job owner is not an active and approved employer");
         }
 
         job.publish();

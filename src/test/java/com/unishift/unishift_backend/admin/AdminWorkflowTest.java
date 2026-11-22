@@ -195,4 +195,59 @@ public class AdminWorkflowTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(0)));
     }
+
+    @Test
+    void adminCannotApproveJobOfUnapprovedEmployer() throws Exception {
+        User unapprovedEmployer = new User(
+            "Unapproved Cafe",
+            "unapproved@cafe.com",
+            passwordEncoder.encode("Password123!"),
+            UserRole.EMPLOYER,
+            true,
+            false
+        );
+        userRepository.save(unapprovedEmployer);
+
+        Instant startsAt = Instant.now().plus(2, ChronoUnit.DAYS);
+        Job job = new Job(
+            unapprovedEmployer,
+            "Shift",
+            "Desc",
+            "Retail",
+            "Shop",
+            new BigDecimal("20.00"),
+            "HOURLY",
+            startsAt,
+            startsAt.plus(2, ChronoUnit.HOURS),
+            2
+        );
+        jobRepository.save(job);
+
+        String adminToken = getAdminToken();
+
+        mockMvc.perform(patch("/api/v1/admin/jobs/" + job.getId() + "/approve")
+                .header("Authorization", "Bearer " + adminToken))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status", is(400)));
+    }
+
+    @Test
+    void approveEmployerFailsWhenUserIsNotEmployer() throws Exception {
+        User student = new User(
+            "Student",
+            "stud.approve@uni.edu",
+            passwordEncoder.encode("Password123!"),
+            UserRole.STUDENT,
+            true,
+            true
+        );
+        userRepository.save(student);
+
+        String adminToken = getAdminToken();
+
+        mockMvc.perform(patch("/api/v1/admin/employers/" + student.getId() + "/approve")
+                .header("Authorization", "Bearer " + adminToken))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status", is(400)));
+    }
 }

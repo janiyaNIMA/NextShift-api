@@ -209,4 +209,63 @@ public class BookingWorkflowTest {
                 .header("Authorization", "Bearer " + employer2Token))
             .andExpect(status().isForbidden());
     }
+
+    @Test
+    void studentCannotBookUnpublishedJob() throws Exception {
+        User employer = new User("OwnerPending", "owner.pending@lab.com", passwordEncoder.encode("Password123!"), UserRole.EMPLOYER, true, true);
+        userRepository.save(employer);
+
+        Instant startsAt = Instant.now().plus(2, ChronoUnit.DAYS);
+        Instant endsAt = startsAt.plus(4, ChronoUnit.HOURS);
+        Job pendingJob = new Job(
+            employer,
+            "Unpublished Job",
+            "Pending moderator",
+            "Academic",
+            "Lab 1",
+            new BigDecimal("20.00"),
+            "HOURLY",
+            startsAt,
+            endsAt,
+            2
+        );
+        jobRepository.save(pendingJob);
+
+        String studentToken = getStudentToken("student.unpub@uni.edu");
+
+        mockMvc.perform(post("/api/v1/jobs/" + pendingJob.getId() + "/bookings")
+                .header("Authorization", "Bearer " + studentToken))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status", is(404)));
+    }
+
+    @Test
+    void studentCannotBookPastDatedJob() throws Exception {
+        User employer = new User("OwnerPast", "owner.past@lab.com", passwordEncoder.encode("Password123!"), UserRole.EMPLOYER, true, true);
+        userRepository.save(employer);
+
+        Instant startsAt = Instant.now().minus(2, ChronoUnit.DAYS);
+        Instant endsAt = startsAt.plus(4, ChronoUnit.HOURS);
+        Job pastJob = new Job(
+            employer,
+            "Past Job",
+            "Already finished shift",
+            "Academic",
+            "Lab 2",
+            new BigDecimal("20.00"),
+            "HOURLY",
+            startsAt,
+            endsAt,
+            2
+        );
+        pastJob.publish();
+        jobRepository.save(pastJob);
+
+        String studentToken = getStudentToken("student.past@uni.edu");
+
+        mockMvc.perform(post("/api/v1/jobs/" + pastJob.getId() + "/bookings")
+                .header("Authorization", "Bearer " + studentToken))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status", is(400)));
+    }
 }

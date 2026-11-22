@@ -6,7 +6,9 @@ import com.unishift.unishift_backend.job.JobRepository;
 import com.unishift.unishift_backend.job.JobStatus;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -26,13 +28,22 @@ public class AllPublishedJobsStrategy implements JobRecommendationStrategy {
         String normalizedCategory = (category != null && !category.isBlank()) ? category.trim() : null;
         String normalizedLocation = (location != null && !location.isBlank()) ? location.trim() : null;
 
+        Pageable effectivePageable = pageable;
+        if (pageable.getSort().isUnsorted()) {
+            effectivePageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Order.desc("publishedAt"), Sort.Order.desc("id"))
+            );
+        }
+
         return jobRepository.findEligibleJobs(
             JobStatus.PUBLISHED,
             Instant.now(),
             normalizedCategory,
             normalizedLocation,
             BookingStatus.CONFIRMED,
-            pageable
+            effectivePageable
         );
     }
 }
