@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -87,7 +88,32 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+        Argon2PasswordEncoder argon2 = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+        return new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence rawPassword) {
+                return bcrypt.encode(rawPassword);
+            }
+
+            @Override
+            public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                if (encodedPassword == null) return false;
+                if (encodedPassword.startsWith("$argon2")) {
+                    try {
+                        return argon2.matches(rawPassword, encodedPassword);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }
+                return bcrypt.matches(rawPassword, encodedPassword);
+            }
+
+            @Override
+            public boolean upgradeEncoding(String encodedPassword) {
+                return false;
+            }
+        };
     }
 
     @Bean

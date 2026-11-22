@@ -1,5 +1,6 @@
 package com.unishift.unishift_backend.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unishift.unishift_backend.user.User;
 import com.unishift.unishift_backend.user.UserRole;
 
@@ -25,4 +26,20 @@ public record UserResponse(
             user.getCreatedAt()
         );
     }
+
+    @JsonProperty("is_approved")
+    public boolean isApprovedAlias() {
+        return approved;
+    }
+
+    @JsonProperty("is_active")
+    public boolean isActiveAlias() {
+        return active;
+    }
+
+    @JsonProperty("created_at")
+    public Instant createdAtAlias() {
+        return createdAt;
+    }
 }
+

@@ -24,10 +24,10 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserRole role;
 
-    @Column(nullable = false)
+    @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
-    @Column(nullable = false)
+    @Column(name = "is_approved", nullable = false)
     private boolean approved = false;
 
     public User() {

@@ -1,5 +1,6 @@
 package com.unishift.unishift_backend.job.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.unishift.unishift_backend.job.Job;
 import com.unishift.unishift_backend.job.JobStatus;
 
@@ -47,4 +48,55 @@ public record JobResponse(
             job.getPublishedAt()
         );
     }
+
+    @JsonProperty("employer_id")
+    public Long employerIdAlias() {
+        return employerId;
+    }
+
+    @JsonProperty("employer_name")
+    public String employerNameAlias() {
+        return employerName;
+    }
+
+    @JsonProperty("pay_amount")
+    public BigDecimal payAmountAlias() {
+        return payAmount;
+    }
+
+    @JsonProperty("pay_unit")
+    public String payUnitAlias() {
+        return payUnit;
+    }
+
+    @JsonProperty("starts_at")
+    public Instant startsAtAlias() {
+        return startsAt;
+    }
+
+    @JsonProperty("ends_at")
+    public Instant endsAtAlias() {
+        return endsAt;
+    }
+
+    @JsonProperty("confirmed_bookings")
+    public long confirmedBookingsAlias() {
+        return confirmedBookings;
+    }
+
+    @JsonProperty("remaining_capacity")
+    public int remainingCapacityAlias() {
+        return remainingCapacity;
+    }
+
+    @JsonProperty("created_at")
+    public Instant createdAtAlias() {
+        return createdAt;
+    }
+
+    @JsonProperty("published_at")
+    public Instant publishedAtAlias() {
+        return publishedAt;
+    }
 }
+

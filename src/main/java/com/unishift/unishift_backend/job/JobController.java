@@ -32,9 +32,16 @@ public class JobController {
     public ResponseEntity<Page<JobResponse>> getPublishedJobs(
         @RequestParam(required = false) String category,
         @RequestParam(required = false) String location,
+        @RequestParam(required = false) Integer skip,
+        @RequestParam(required = false) Integer limit,
         @AuthenticationPrincipal UserDetails userDetails,
         @PageableDefault(size = 20) Pageable pageable
     ) {
+        if (skip != null || limit != null) {
+            int pageSize = limit != null && limit > 0 ? limit : pageable.getPageSize();
+            int pageNumber = skip != null && skip >= 0 ? skip / pageSize : pageable.getPageNumber();
+            pageable = org.springframework.data.domain.PageRequest.of(pageNumber, pageSize, pageable.getSort());
+        }
         String userEmail = userDetails != null ? userDetails.getUsername() : null;
         Page<JobResponse> jobs = jobService.getPublishedJobs(userEmail, category, location, pageable);
         return ResponseEntity.ok(jobs);

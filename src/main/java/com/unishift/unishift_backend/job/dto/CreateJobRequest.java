@@ -1,5 +1,6 @@
 package com.unishift.unishift_backend.job.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
@@ -24,16 +25,20 @@ public record CreateJobRequest(
 
     @NotNull(message = "Pay amount is required")
     @DecimalMin(value = "0.01", message = "Pay amount must be greater than zero")
+    @JsonAlias({"pay_amount", "payAmount"})
     BigDecimal payAmount,
 
     @NotBlank(message = "Pay unit is required")
+    @JsonAlias({"pay_unit", "payUnit"})
     String payUnit,
 
     @NotNull(message = "Start time is required")
     @Future(message = "Start time must be in the future")
+    @JsonAlias({"starts_at", "startsAt"})
     Instant startsAt,
 
     @NotNull(message = "End time is required")
+    @JsonAlias({"ends_at", "endsAt"})
     Instant endsAt,
 
     @NotNull(message = "Capacity is required")

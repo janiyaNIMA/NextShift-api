@@ -24,22 +24,105 @@ public class AdminBootstrapConfig {
     @Bean
     public ApplicationRunner bootstrapAdmin(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            if (adminEmail == null || adminEmail.isBlank() || adminPassword == null || adminPassword.isBlank()) {
-                return;
-            }
+            // Bootstrap admin@unishift.com
+            bootstrapUser(
+                userRepository,
+                passwordEncoder,
+                "admin@unishift.com",
+                "AdminSecurePassword123!",
+                "Platform Administrator",
+                UserRole.ADMIN,
+                true
+            );
 
-            String normalizedEmail = adminEmail.trim().toLowerCase();
-            if (!userRepository.existsByEmail(normalizedEmail)) {
-                User admin = new User(
+            // Bootstrap admin@example.com
+            bootstrapUser(
+                userRepository,
+                passwordEncoder,
+                "admin@example.com",
+                "AdminSecurePassword123!",
+                "Platform Administrator",
+                UserRole.ADMIN,
+                true
+            );
+
+            // If a custom admin is configured in env, bootstrap that as well
+            if (adminEmail != null && !adminEmail.isBlank() && adminPassword != null && !adminPassword.isBlank()) {
+                bootstrapUser(
+                    userRepository,
+                    passwordEncoder,
+                    adminEmail,
+                    adminPassword,
                     adminName != null && !adminName.isBlank() ? adminName : "Platform Administrator",
-                    normalizedEmail,
-                    passwordEncoder.encode(adminPassword),
                     UserRole.ADMIN,
-                    true,
                     true
                 );
-                userRepository.save(admin);
             }
+
+            // Bootstrap demo student (student@example.com)
+            bootstrapUser(
+                userRepository,
+                passwordEncoder,
+                "student@example.com",
+                "Student1234!",
+                "Demo Student",
+                UserRole.STUDENT,
+                true
+            );
+
+            // Bootstrap demo employer (employer@example.com)
+            bootstrapUser(
+                userRepository,
+                passwordEncoder,
+                "employer@example.com",
+                "Employer1234!",
+                "Demo Employer Inc",
+                UserRole.EMPLOYER,
+                true
+            );
         };
+    }
+
+    private void bootstrapUser(
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder,
+        String email,
+        String password,
+        String name,
+        UserRole role,
+        boolean approved
+    ) {
+        String normalizedEmail = email.trim().toLowerCase();
+        userRepository.findByEmail(normalizedEmail).ifPresentOrElse(
+            user -> {
+                boolean changed = false;
+                if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+                    user.setPasswordHash(passwordEncoder.encode(password));
+                    changed = true;
+                }
+                if (!user.isActive()) {
+                    user.setActive(true);
+                    changed = true;
+                }
+                if (approved && !user.isApproved()) {
+                    user.setApproved(true);
+                    changed = true;
+                }
+                if (changed) {
+                    userRepository.save(user);
+                }
+            },
+            () -> {
+                User user = new User(
+                    name,
+                    normalizedEmail,
+                    passwordEncoder.encode(password),
+                    role,
+                    true,
+                    approved
+                );
+                userRepository.save(user);
+            }
+        );
     }
 }
